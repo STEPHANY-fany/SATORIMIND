@@ -1,0 +1,222 @@
+package com.example.mysatoro
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import android.media.MediaPlayer
+import androidx.compose.ui.platform.LocalContext
+
+@Composable
+fun AudioControl(title: String, mediaPlayer: MediaPlayer) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Text(title, fontSize = 18.sp, color = Color.White)
+
+        Row {
+            Button(onClick = { mediaPlayer.start() }, modifier = Modifier.padding(end = 8.dp)) {
+                Text("Reproducir")
+            }
+            Button(onClick = { mediaPlayer.pause() }) {
+                Text("Pausar")
+            }
+        }
+    }
+}
+
+@Composable
+fun HerramientasScreen(navController: NavController) {
+    var showEjercicios by remember { mutableStateOf(false) }
+    var showAudios by remember { mutableStateOf(false) }
+    var showVideos by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF00C2FA),
+                        Color(0xFFB48CF2)
+                    )
+                )
+            )
+            .padding(16.dp)
+    ) {
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            Text("Volver", fontSize = 18.sp)
+        }
+
+        Image(
+            painter = painterResource(id = R.drawable.encabezado_herra),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            contentScale = ContentScale.FillWidth
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+
+        // Botón y sección de Ejercicios
+        Button(onClick = { showEjercicios = !showEjercicios }) {
+            Text("Ejercicios", fontSize = 20.sp)
+        }
+        AnimatedVisibility(visible = showEjercicios) {
+            Column(modifier = Modifier.padding(start = 8.dp, top = 8.dp)) {
+
+                Text(
+                    text = "Ejercicios diarios",
+                    fontSize = 20.sp,
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    "Realiza los siguientes ejercicios al menos 2 veces por semana ",
+                    fontSize = 18.sp
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.one),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.two),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.tree),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.cuatro),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(160.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+
+                }
+                Text(
+                    "Intenta hacer 30 repeticiones de cada uno esto libera tensiones y fortalece la mente para enfrentar el estrés con más calma. ",
+                    fontSize = 18.sp
+                )
+
+            }
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Button(onClick = { showAudios = !showAudios }) {
+            Text("Audios", fontSize = 20.sp)
+        }
+        AnimatedVisibility(visible = showAudios) {
+            val context = LocalContext.current
+
+            // Cada audio con su propio MediaPlayer
+            val playerOne = remember { MediaPlayer.create(context, R.raw.audione) }
+            val playerTwo = remember { MediaPlayer.create(context, R.raw.audiodos) }
+            val playerThree = remember { MediaPlayer.create(context, R.raw.audiotrees) }
+            val playerFour = remember { MediaPlayer.create(context, R.raw.audiocuatro) }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    playerOne.release()
+                    playerTwo.release()
+                    playerThree.release()
+                    playerFour.release()
+                }
+            }
+
+            Column(modifier = Modifier.padding(start = 8.dp, top = 8.dp)) {
+                Text(
+                    "Los sonidos calmantes activan el sistema nervioso parasimpático, el encargado de inducir estados de descanso y relajación...",
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                AudioControl("Audio 1", playerOne)
+                AudioControl("Audio 2", playerTwo)
+                AudioControl("Audio 3", playerThree)
+                AudioControl("Audio 4", playerFour)
+
+                AnimatedVisibility(visible = showAudios) {
+                    Column {
+                        Text("Usa audifonos para bloquear los ruidos del exterior", fontSize = 16.sp, color = Color.Black)
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Button(onClick = { showVideos = !showVideos }) {
+            Text("Respiración", fontSize = 20.sp)
+        }
+        AnimatedVisibility(visible = showVideos) {
+            Column(modifier = Modifier.padding(start = 8.dp, top = 8.dp)) {
+                Text("Realiza los siguientes ejercicios para controlar tu respiración, sigue el ejemplo de cada paso en las imagenes ", fontSize = 16.sp, color = Color.Black)
+                Image(
+                    painter = painterResource(id = R.drawable.respiracion),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(160.dp)
+                        .padding(end = 16.dp),
+                    contentScale = ContentScale.Fit
+                )
+                Text("Colocarse en una postura cómoda para realizar ejercicios de respiración, con una mano en el pecho y otra en el abdomen.", fontSize = 16.sp, color = Color.Black)
+
+
+            }
+        }
+    }
+}
+
