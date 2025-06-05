@@ -1,0 +1,137 @@
+package com.example.mysatoro
+
+import android.media.MediaPlayer
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.compose.ui.Alignment
+
+
+@Composable
+fun AnsiScreen(navController: NavController) {
+    val context = LocalContext.current
+    val mediaPlayer = remember { MediaPlayer.create(context, R.raw.juego) }
+
+    var juegoIniciado by remember { mutableStateOf(false) }
+    var seleccion by remember { mutableStateOf<String?>(null) }
+    var mensajeResultado by remember { mutableStateOf("") }
+
+    val animales = listOf("Delfin", "Tiburón", "Ballena","Caballo de mar", "Nanati", "Leon Marino")
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF7C44BC),
+                        Color(0xFF9294E4),
+                        Color(0xFFB48CF2)
+                    ),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
+            )
+            .padding(16.dp)
+    ) {
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            Text("Volver", fontSize = 18.sp)
+        }
+
+        Image(
+            painter = painterResource(id = R.drawable.encabezado_herra),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            contentScale = ContentScale.FillWidth
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "¡Vamos a jugar!",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            fontSize = 25.sp,
+            color = Color.White
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Concentremos tu mente en un juego de adivinanzas, esto va a ayudar a calmar tu sensación ansiosa.",
+            fontSize = 16.sp,
+            color = Color.White
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                juegoIniciado = true
+                mediaPlayer.start()
+            },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Iniciar juego")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (juegoIniciado) {
+            Text("¿Cuál de estos animales es el más grande?", color = Color.White, fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            animales.forEach { animal ->
+                Button(
+                    onClick = {
+                        seleccion = animal
+                        mensajeResultado = if (animal == "Ballena") {
+                            "🎉 ¡Felicidades, ganaste!"
+                        } else {
+                            "Intenta de nuevo 🐾"
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    Text(animal)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (seleccion != null) {
+                Text(
+                    text = mensajeResultado,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                mediaPlayer.release()
+            }
+        }
+    }
+}
