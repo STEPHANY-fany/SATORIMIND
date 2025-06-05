@@ -1,0 +1,154 @@
+package com.example.mysatoro
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import androidx.navigation.NavController
+import androidx.compose.foundation.Image
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+
+
+
+@Composable
+fun SeguimientoScreen(navController: NavController) {
+    var diaAnsiedad by rememberSaveable { mutableStateOf("") }
+    var herramienta by rememberSaveable { mutableStateOf("") }
+    var nivelAnsiedad by rememberSaveable { mutableStateOf(0) }
+    var herramientasUsadas by rememberSaveable { mutableStateOf(mutableSetOf<String>()) }
+    var mostrarResultado by rememberSaveable { mutableStateOf(false) }
+
+    val dias = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+    val herramientas = listOf("Respirar", "Escuchar audios", "Oír música", "Diario emocional")
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF3F27A8),
+                        Color(0xFFB48CF2),
+                        Color(0xFF00C2FA)
+                    ),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
+            )
+            .padding(16.dp)
+    ) {
+        Button(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Text("Volver", fontSize = 18.sp)
+        }
+
+        Image(
+            painter = painterResource(id = R.drawable.encabezado_seguimiento),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp),
+            contentScale = ContentScale.FillWidth
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("🗓 ¿Qué día sentiste más ansiedad?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        dias.forEach { dia ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = diaAnsiedad == dia, onClick = { diaAnsiedad = dia })
+                Text(dia, color = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("🧰 ¿Qué herramienta te ayudó más?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        herramientas.take(3).forEach { h ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = herramienta == h, onClick = { herramienta = h })
+                Text(h, color = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("📊 ¿Cómo calificarías tu ansiedad esta semana? (1-5)", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        (1..5).forEach { nivel ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(selected = nivelAnsiedad == nivel, onClick = { nivelAnsiedad = nivel })
+                Text("Nivel $nivel", color = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("🛠 ¿Qué herramientas usaste esta semana?", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        herramientas.forEach { h ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = herramientasUsadas.contains(h),
+                    onCheckedChange = {
+                        if (it) herramientasUsadas.add(h)
+                        else herramientasUsadas.remove(h)
+                    }
+                )
+                Text(h, color = Color.White)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = { mostrarResultado = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("Ver Seguimiento")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (mostrarResultado) {
+            val estado = when (nivelAnsiedad) {
+                1 -> "😊 Tranquilidad máxima"
+                2 -> "🙂 Bien manejado"
+                3 -> "😐 Podría mejorar"
+                4 -> "😟 Nivel alto"
+                5 -> "😢 Mucha ansiedad"
+                else -> ""
+            }
+
+            val frase = when (herramienta) {
+                "Respirar" -> "“Cada respiración consciente te acerca a la calma.”"
+                "Escuchar audios" -> "“Permítete sentir y soltar.”"
+                "Oír música" -> "“Donde las palabras fallan, la música habla.”"
+                else -> "“Estás haciendo lo mejor que puedes, y eso es suficiente.”"
+            }
+
+            Text("🧾 Resumen de tu semana", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text("📅 Día con más ansiedad: $diaAnsiedad", color = Color.White)
+            Text("🛠 Herramienta que más ayudó: $herramienta", color = Color.White)
+            Text("📈 Nivel de ansiedad: $nivelAnsiedad", color = Color.White)
+            Text("🎯 Estado emocional: $estado", color = Color.White)
+            Text("🧰 Herramientas que usaste: ${herramientasUsadas.joinToString(", ")}", color = Color.White)
+            Text("💬 Frase motivadora: $frase", color = Color.White, fontStyle = FontStyle.Italic)
+        }
+    }
+}
